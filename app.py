@@ -4,6 +4,7 @@ from flask_cors import CORS
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
+from curl_cffi import requests as curl_requests
 
 app = Flask(__name__)
 CORS(app)
@@ -33,15 +34,12 @@ def get_stock():
         interval_map = {'1d': '1d', '1D': '1d', '4H': '1h', '1W': '1wk'}
         yf_interval = interval_map.get(interval, '1d')
         
-        df = yf.download(
-            ticker,
-            start=start_date,
-            end=end_date,
-            interval=yf_interval,
-            progress=False,
-            auto_adjust=True,
-            threads=False
-        )
+        # Create a browser-impersonating session
+        session = curl_requests.Session(impersonate="chrome")
+        
+        # Use the session with yfinance
+        ticker_obj = yf.Ticker(ticker, session=session)
+        df = ticker_obj.history(start=start_date, end=end_date, interval=yf_interval, auto_adjust=True)
         
         if df.empty:
             return jsonify({"error": f"No data for {ticker}"}), 404
@@ -72,7 +70,9 @@ def get_current_price():
         return jsonify({"error": "Missing ticker parameter"}), 400
     
     try:
-        ticker_obj = yf.Ticker(ticker)
+        # Create a browser-impersonating session
+        session = curl_requests.Session(impersonate="chrome")
+        ticker_obj = yf.Ticker(ticker, session=session)
         hist = ticker_obj.history(period="1d")
         
         if hist.empty:
