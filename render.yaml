@@ -1,9 +1,9 @@
 services:
   - type: web
     name: yfinance-proxy
-    runtime: python
-    repo: https://github.com/farrukhqayum/yfinance-proxy/
-    plan: free
+    runtime: python3
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.11.9
