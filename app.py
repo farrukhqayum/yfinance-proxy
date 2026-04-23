@@ -4,6 +4,16 @@ import yfinance as yf
 import pandas as pd
 from datetime import datetime, timedelta
 
+YF_PROXY_API_KEY = os.environ.get('YF_PROXY_API_KEY', None)
+
+@app.route('/get_stock', methods=['GET'])
+def get_stock():
+    # Check API key if set
+    if PROXY_API_KEY:
+        api_key = request.args.get('api_key')
+        if api_key != YF_PROXY_API_KEY:
+            return jsonify({"error": "Unauthorized"}), 401
+            
 app = Flask(__name__)
 CORS(app)  # Allow Streamlit app to call this proxy
 
